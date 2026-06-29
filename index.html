@@ -594,7 +594,7 @@ input.invalid, select.invalid { border-color: var(--error); }
 
     <!-- Account type (SSM only) -->
     <div class="form-group">
-      <label for="accountType">Account type</label>
+      <label for="accountType">Account type <span class="req">*</span></label>
       <div class="select-wrap">
         <select id="accountType" name="accountType">
           <option value="">Select account type…</option>
@@ -603,11 +603,12 @@ input.invalid, select.invalid { border-color: var(--error); }
           <option value="Read Only">Read Only</option>
         </select>
       </div>
+      <div class="error-text" id="accountTypeError">Please select an account type</div>
     </div>
 
     <!-- Department -->
     <div class="form-group">
-      <label for="department">Department</label>
+      <label for="department">Department <span class="req">*</span></label>
       <div class="select-wrap">
         <select id="department" name="department">
           <option value="">Select department…</option>
@@ -621,6 +622,7 @@ input.invalid, select.invalid { border-color: var(--error); }
           <option value="Other">Other</option>
         </select>
       </div>
+      <div class="error-text" id="departmentError">Please select a department</div>
     </div>
 
     <!-- State -->
@@ -1176,6 +1178,8 @@ document.getElementById('regForm').addEventListener('submit', function(e) {
   } else { branchError.classList.remove('visible'); branchWrap.classList.remove('has-error'); }
 
   if (!fv('jobTitle')) { showErr('jobTitleError','Please select a job title'); markField('jobTitle',true); valid=false; } else { showErr('jobTitleError',''); markField('jobTitle',false); }
+  if (!fv('accountType')) { showErr('accountTypeError','Please select an account type'); markField('accountType',true); valid=false; } else { showErr('accountTypeError',''); markField('accountType',false); }
+  if (!fv('department')) { showErr('departmentError','Please select a department'); markField('department',true); valid=false; } else { showErr('departmentError',''); markField('department',false); }
   if (!fv('state'))    { showErr('stateError','Please select a state');         markField('state',true);    valid=false; } else { showErr('stateError','');    markField('state',false); }
   if (!fv('timezone')) { showErr('timezoneError','Required');                   markField('timezone',true); valid=false; } else { showErr('timezoneError',''); markField('timezone',false); }
   if (!fv('country'))  { showErr('countryError','Required');                    markField('country',true);  valid=false; } else { showErr('countryError','');  markField('country',false); }
@@ -1246,7 +1250,7 @@ document.getElementById('regForm').addEventListener('submit', function(e) {
 ['firstName','lastName','email','password'].forEach(id => {
   document.getElementById(id)?.addEventListener('input', function() { this.classList.remove('invalid'); });
 });
-['jobTitle','state','timezone','country'].forEach(id => {
+['jobTitle','state','timezone','country','accountType','department'].forEach(id => {
   document.getElementById(id)?.addEventListener('change', function() { this.classList.remove('invalid'); });
 });
 </script>
