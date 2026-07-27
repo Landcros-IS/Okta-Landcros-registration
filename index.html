@@ -390,7 +390,26 @@ input::placeholder { color: var(--gray-light); }
 }
 
 /* ── Error / helper ── */
-.helper-text {
+.pw-requirements {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.pw-req {
+  font-size: 12px;
+  color: var(--gray-light);
+  transition: color 0.2s;
+}
+
+.pw-req.met {
+  color: #1A7A4A;
+}
+
+.pw-req.met::first-letter {
+  content: '✓';
+}
   font-size: 11px;
   color: var(--gray-mid);
   margin-top: 4px;
@@ -517,7 +536,7 @@ input.invalid, select.invalid { border-color: var(--error); }
     <div class="form-group">
       <label for="password">Password <span class="req">*</span></label>
       <div class="password-wrap">
-        <input type="password" id="password" placeholder="Min. 8 characters" autocomplete="new-password" />
+        <input type="password" id="password" placeholder="Create a password" autocomplete="new-password" />
         <button type="button" class="toggle-pw" id="togglePw">Show</button>
       </div>
       <div class="pw-strength">
@@ -527,7 +546,14 @@ input.invalid, select.invalid { border-color: var(--error); }
         <div class="pw-bar" id="bar4"></div>
         <span class="pw-label" id="pwLabel">—</span>
       </div>
-      <div class="error-text" id="passwordError">Password must be at least 8 characters</div>
+      <div class="pw-requirements">
+        <div class="pw-req" id="req-length">✗ At least 8 characters</div>
+        <div class="pw-req" id="req-upper">✗ An uppercase letter</div>
+        <div class="pw-req" id="req-number">✗ A number</div>
+        <div class="pw-req" id="req-symbol">✗ A symbol (e.g. !@#$%)</div>
+        <div class="pw-req" id="req-name">✗ Does not include your first or last name</div>
+      </div>
+      <div class="error-text" id="passwordError">Password does not meet requirements</div>
     </div>
 
     <!-- ── Dealer Info ── -->
@@ -1124,14 +1150,42 @@ const LABELS  = ['Weak','Fair','Good','Strong'];
 
 pwInput.addEventListener('input', () => {
   const v = pwInput.value;
+  const firstName = document.getElementById('firstName').value.trim().toLowerCase();
+  const lastName  = document.getElementById('lastName').value.trim().toLowerCase();
+
+  const checks = {
+    'req-length': v.length >= 8,
+    'req-upper':  /[A-Z]/.test(v),
+    'req-number': /[0-9]/.test(v),
+    'req-symbol': /[^A-Za-z0-9]/.test(v),
+    'req-name':   !firstName || !v.toLowerCase().includes(firstName) && (!lastName || !v.toLowerCase().includes(lastName))
+  };
+
+  const labels = {
+    'req-length': '8 characters',
+    'req-upper':  'An uppercase letter',
+    'req-number': 'A number',
+    'req-symbol': 'A symbol (e.g. !@#$%)',
+    'req-name':   'Does not include your first or last name'
+  };
+
   let score = 0;
-  if (v.length >= 8)           score++;
-  if (/[A-Z]/.test(v))        score++;
-  if (/[0-9]/.test(v))        score++;
-  if (/[^A-Za-z0-9]/.test(v)) score++;
-  bars.forEach((b, i) => b.style.background = i < score ? COLORS[score-1] : 'var(--border)');
-  pwLabel.textContent = v.length ? (LABELS[score-1] ?? '—') : '—';
-  pwLabel.style.color = v.length ? COLORS[score-1] : 'var(--gray-light)';
+  Object.entries(checks).forEach(([id, passed]) => {
+    const el = document.getElementById(id);
+    if (passed) {
+      el.textContent = '✓ ' + labels[id];
+      el.classList.add('met');
+      score++;
+    } else {
+      el.textContent = '✗ ' + labels[id];
+      el.classList.remove('met');
+    }
+  });
+
+  const strengthScore = Math.min(4, [v.length >= 8, /[A-Z]/.test(v), /[0-9]/.test(v), /[^A-Za-z0-9]/.test(v)].filter(Boolean).length);
+  bars.forEach((b, i) => b.style.background = i < strengthScore ? COLORS[strengthScore-1] : 'var(--border)');
+  pwLabel.textContent = v.length ? (LABELS[strengthScore-1] ?? '—') : '—';
+  pwLabel.style.color = v.length ? COLORS[strengthScore-1] : 'var(--gray-light)';
 });
 
 document.getElementById('togglePw').addEventListener('click', function() {
@@ -1169,8 +1223,14 @@ document.getElementById('regForm').addEventListener('submit', function(e) {
     showErr('emailError','Enter a valid email address'); markField('email',true); valid=false;
   } else { showErr('emailError',''); markField('email',false); }
 
-  if (fv('password').length < 8) {
-    showErr('passwordError','Password must be at least 8 characters'); markField('password',true); valid=false;
+  const pw = fv('password');
+  const fnLower = fv('firstName').toLowerCase();
+  const lnLower = fv('lastName').toLowerCase();
+  const pwValid = pw.length >= 8 && /[A-Z]/.test(pw) && /[0-9]/.test(pw) && /[^A-Za-z0-9]/.test(pw) &&
+    (!fnLower || !pw.toLowerCase().includes(fnLower)) &&
+    (!lnLower || !pw.toLowerCase().includes(lnLower));
+  if (!pwValid) {
+    showErr('passwordError','Password does not meet requirements'); markField('password',true); valid=false;
   } else { showErr('passwordError',''); markField('password',false); }
 
   if (!selBranch) {
