@@ -1352,6 +1352,7 @@ document.getElementById('regForm').addEventListener('submit', function(e) {
     })
     .then(res => {
       if (res.ok || res.status === 202) {
+        document.getElementById('errorBanner').classList.remove('show');
         document.getElementById('successBanner').classList.add('show');
         document.getElementById('regForm').reset();
         const tag = branchWrap.querySelector('.tag');
@@ -1364,24 +1365,23 @@ document.getElementById('regForm').addEventListener('submit', function(e) {
         pwLabel.textContent = '—';
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
-        res.json().then(data => {
+        document.getElementById('successBanner').classList.remove('show');
+        res.json().catch(() => ({})).then(data => {
           const causes = data?.errorCauses || [];
           const isDuplicate = causes.some(c =>
             c.errorSummary?.toLowerCase().includes('already exists') ||
             c.errorSummary?.toLowerCase().includes('login')
           ) || data?.errorSummary?.toLowerCase().includes('already exists');
-
           if (isDuplicate) {
             showFormError('An account with this email address already exists. Please <a href="https://dealerportal.hitachicm.us" style="color:var(--orange)">sign in</a> or contact <a href="mailto:portalhelp@hitachicm.us" style="color:var(--orange)">portalhelp@hitachicm.us</a> if you need help accessing your account.');
           } else {
             showFormError('Submission failed. Please try again or contact <a href="mailto:portalhelp@hitachicm.us" style="color:var(--orange)">portalhelp@hitachicm.us</a> for assistance.');
           }
-        }).catch(() => {
-          showFormError('Submission failed. Please try again or contact <a href="mailto:portalhelp@hitachicm.us" style="color:var(--orange)">portalhelp@hitachicm.us</a> for assistance.');
         });
       }
     })
     .catch(() => {
+      document.getElementById('successBanner').classList.remove('show');
       showFormError('Network error. Please check your connection and try again, or contact <a href="mailto:portalhelp@hitachicm.us" style="color:var(--orange)">portalhelp@hitachicm.us</a>.');
     })
     .finally(() => {
