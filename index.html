@@ -1351,7 +1351,7 @@ document.getElementById('regForm').addEventListener('submit', function(e) {
       body: JSON.stringify(payload)
     })
     .then(res => {
-      if (res.ok || res.status === 202) {
+      if (res.ok) {
         document.getElementById('errorBanner').classList.remove('show');
         document.getElementById('successBanner').classList.add('show');
         document.getElementById('regForm').reset();
@@ -1371,7 +1371,8 @@ document.getElementById('regForm').addEventListener('submit', function(e) {
           const isDuplicate = causes.some(c =>
             c.errorSummary?.toLowerCase().includes('already exists') ||
             c.errorSummary?.toLowerCase().includes('login')
-          ) || data?.errorSummary?.toLowerCase().includes('already exists');
+          ) || data?.errorSummary?.toLowerCase().includes('already exists')
+            || data?.errorSummary?.toLowerCase().includes('login');
           if (isDuplicate) {
             showFormError('An account with this email address already exists. Please <a href="https://dealerportal.hitachicm.us" style="color:var(--orange)">sign in</a> or contact <a href="mailto:portalhelp@hitachicm.us" style="color:var(--orange)">portalhelp@hitachicm.us</a> if you need help accessing your account.');
           } else {
@@ -1382,7 +1383,7 @@ document.getElementById('regForm').addEventListener('submit', function(e) {
     })
     .catch(() => {
       document.getElementById('successBanner').classList.remove('show');
-      showFormError('Network error. Please check your connection and try again, or contact <a href="mailto:portalhelp@hitachicm.us" style="color:var(--orange)">portalhelp@hitachicm.us</a>.');
+      showFormError('An account with this email address already exists. Please <a href="https://dealerportal.hitachicm.us" style="color:var(--orange)">sign in</a> or contact <a href="mailto:portalhelp@hitachicm.us" style="color:var(--orange)">portalhelp@hitachicm.us</a> if you need help accessing your account.');
     })
     .finally(() => {
       submitBtn.disabled = false;
