@@ -392,13 +392,17 @@ input::placeholder { color: var(--gray-light); }
 /* ── Error / helper ── */
 .pw-requirements {
   margin-top: 8px;
-  display: flex;
+  display: none;
   flex-direction: column;
   gap: 3px;
   padding: 10px 12px;
   background: #F9F9F9;
   border: 1px solid var(--border);
   border-radius: var(--radius);
+}
+
+.pw-requirements.visible {
+  display: flex;
 }
 
 .pw-req {
@@ -485,6 +489,8 @@ input::placeholder { color: var(--gray-light); }
 }
 
 .error-banner.show { display: block; }
+
+.success-banner {
   display: none;
   background: #E6F4ED;
   border: 1px solid #A3D9B8;
@@ -1184,6 +1190,7 @@ const COLORS  = ['#C0392B','#E67E22','#F1C40F','#1A7A4A'];
 const LABELS  = ['Weak','Fair','Good','Strong'];
 
 pwInput.addEventListener('input', () => {
+  document.querySelector('.pw-requirements').classList.add('visible');
   const v = pwInput.value;
   const firstName = document.getElementById('firstName').value.trim().toLowerCase();
   const lastName  = document.getElementById('lastName').value.trim().toLowerCase();
@@ -1279,6 +1286,7 @@ document.getElementById('regForm').addEventListener('submit', function(e) {
   if (!pwValid) {
     showErr('passwordError','Please fix the password requirements highlighted in red below:');
     markField('password', true);
+    document.querySelector('.pw-requirements').classList.add('visible');
     Object.entries(pwChecks).forEach(([id, passed]) => {
       const el = document.getElementById(id);
       if (!passed) el.classList.add('unmet-error');
